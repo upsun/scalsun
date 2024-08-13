@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	APP_NAME = "scaling-instance"
+	APP_NAME = "scalsun"
 )
 
 func init() {
