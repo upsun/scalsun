@@ -5,8 +5,8 @@ import (
 	"os"
 
 	flag "github.com/spf13/pflag"
-	entity "github.com/upsun/lib-upsun/entity"
-	utils "github.com/upsun/lib-upsun/utility"
+	entity "github.com/upsun/lib-sun/entity"
+	utils "github.com/upsun/lib-sun/utility"
 	app "github.com/upsun/scalsun"
 	logic "github.com/upsun/scalsun/internal/logic"
 )

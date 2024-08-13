@@ -7,8 +7,8 @@ import (
 	"strconv"
 	"strings"
 
-	entity "github.com/upsun/lib-upsun/entity"
-	utils "github.com/upsun/lib-upsun/utility"
+	entity "github.com/upsun/lib-sun/entity"
+	utils "github.com/upsun/lib-sun/utility"
 	app "github.com/upsun/scalsun"
 )
 
