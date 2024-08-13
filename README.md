@@ -4,17 +4,22 @@ ScalSun
 This tool provide simple auto-scaling on upsun project. 
 
 ## Usage/install
-Deploy the **scalsun** binary into your project on build hook.
+
+Deploy the **scalsun** and **Upsun CLI** binary into your project
+
+On `.upsun/config`  
+Add to build hook :
 ```
     hook:
         build: |
             mkdir bin
+            curl -fsSL https://raw.githubusercontent.com/platformsh/cli/main/installer.sh | VENDOR=upsun bash
             wget https://github.com/upsun/scalsun/releases/download/v0.3.0/scalsun-v0.3.0-linux-amd64.tar.gz -o scalsun.tar.gz
             tar -xzf scalsun.tar.gz -c bin
             rm scalsun.tar.gz
 ```
 
-Add cron task every minute on `.upsun/config` :
+Add cron task every minute :
 ```
     crons:
         autoscaller:
@@ -25,7 +30,15 @@ Add cron task every minute on `.upsun/config` :
                         /app/bin/scalsun --silent --max_host_count=${H_SCALING_HOST_MAX:-3}
                     fi
 ```
+
+On `Upsun console`,
+Add a environment variables with your [token](https://docs.upsun.com/administration/cli/api-tokens.html#2-create-an-api-token) :
+```
+env:UPSUN_CLI_TOKEN
+```
+
 #### Syntax
+
 ```
 Usage of scalsun:
       --min_host_count: int             Minimum host count (default 1)
