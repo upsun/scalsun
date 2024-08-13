@@ -3,15 +3,15 @@ ScalSun
 
 This tool provide simple auto-scaling on upsun project. 
 
-[[_TOC_]]
-
 ## Usage/install
 Deploy the **scalsun** binary into your project on build hook.
 ```
     hook:
         build: |
             mkdir bin
-            curl ...
+            wget https://github.com/upsun/scalsun/releases/download/v0.3.0/scalsun-v0.3.0-linux-amd64.tar.gz -o scalsun.tar.gz
+            tar -xzf scalsun.tar.gz -c bin
+            rm scalsun.tar.gz
 ```
 
 Add cron task every minute on `.upsun/config` :
