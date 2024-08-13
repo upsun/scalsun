@@ -14,9 +14,7 @@ Add to build hook :
         build: |
             mkdir bin
             curl -fsSL https://raw.githubusercontent.com/platformsh/cli/main/installer.sh | VENDOR=upsun bash
-            wget https://github.com/upsun/scalsun/releases/download/v0.3.0/scalsun-v0.3.0-linux-amd64.tar.gz -o scalsun.tar.gz
-            tar -xzf scalsun.tar.gz -c bin
-            rm scalsun.tar.gz
+            curl -fsSL https://github.com/upsun/scalsun/releases/download/v0.3.0/scalsun-v0.3.0-linux-amd64.tar.gz | tar -xzf - -c bin
 ```
 
 Add cron task every minute :
@@ -31,13 +29,13 @@ Add cron task every minute :
                     fi
 ```
 
-On `Upsun console`,
+On `Upsun console`,  
 Add a environment variables with your [token](https://docs.upsun.com/administration/cli/api-tokens.html#2-create-an-api-token) :
 ```
 env:UPSUN_CLI_TOKEN
 ```
 
-#### Syntax
+### Syntax
 
 ```
 Usage of scalsun:
