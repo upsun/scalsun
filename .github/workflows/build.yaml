@@ -5,6 +5,8 @@ on:
     branches: [ "master" ]
   pull_request:
     branches: [ "master" ]
+  schedule:
+  - cron: '0 10 * * 1' # run "At 10:00 on Monday"
 
 permissions:
   contents: read
@@ -17,6 +19,17 @@ jobs:
     - uses: actions/setup-go@v4
       with:
         go-version: '1.22'
+        check-latest: true
+    - name: Go Format
+      run: gofmt -s -w . && git diff --exit-code
+    - name: Go Vet
+      run: go vet ./...
+    - name: Go Tidy
+      run: go mod tidy && git diff --exit-code
+    - name: Go Mod
+      run: go mod download
+    - name: Go Mod Verify
+      run: go mod verify
     - uses: golangci/golangci-lint-action@v6
       with:
         version: latest
@@ -26,7 +39,21 @@ jobs:
     - uses: actions/checkout@v4
     - uses: actions/setup-go@v4
     - name: Run tests
-      run: go test -count=1 -race ./...
+      run: go test -v -count=1 -race -shuffle=on -coverprofile=coverage.txt ./...
+    - name: Go Benchmark
+      run: go test -v -shuffle=on -run=- -bench=. -benchtime=1x ./...
+    # - name: Upload Coverage
+    #   uses: codecov/codecov-action@v3
+    #   continue-on-error: true  # we don't care if it fails
+    #   with:
+    #     token: ${{secrets.CODECOV_TOKEN}}  # set in repository settings
+    #     file: ./coverage.txt  # file from the previous step
+    #     fail_ci_if_error: false
+    - name: Install govulncheck
+      run: go install golang.org/x/vuln/cmd/govulncheck@latest
+    - name: Run govulncheck
+      run: govulncheck -test ./...
+
   build:
     needs: [test, lint]
     runs-on: ubuntu-latest
@@ -36,4 +63,4 @@ jobs:
       with:
         go-version: '1.22'
     - name: Build
-      run: go build -v ./...
+      run: go build -o /dev/null -v ./...
