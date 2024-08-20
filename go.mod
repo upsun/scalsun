@@ -4,7 +4,7 @@ go 1.22.6
 
 require (
 	github.com/spf13/pflag v1.0.5
-	github.com/upsun/lib-sun v0.3.2
+	github.com/upsun/lib-sun v0.3.4
 )
 
 require (
