@@ -12,7 +12,7 @@ permissions:
   contents: read
 
 env:
-  GOPRIVATE: github.com/upsun
+  GOPRIVATE: github.com/upsun/lib-sun
 
 jobs:
   lint:
