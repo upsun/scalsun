@@ -13,7 +13,7 @@
             "env": {
                 "PLATFORMSH_CLI_TOKEN": "",
                 "UPSUN_CLI_TOKEN": "",
-                "PLATFORM_PROJECT": "3lgb35gy6kcho",
+                "PLATFORM_PROJECT": "xxxxxxxxx",
                 "PLATFORM_BRANCH": "master",
 
             }
