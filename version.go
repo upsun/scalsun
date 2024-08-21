@@ -4,7 +4,7 @@ import (
 	entity "github.com/upsun/lib-sun/entity"
 )
 
-const VERSION = "development"
+var VERSION = "development"
 
 var (
 	Args  entity.CliCommonArgs
