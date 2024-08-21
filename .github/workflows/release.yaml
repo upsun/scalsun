@@ -8,12 +8,19 @@ permissions:
     contents: write
     packages: write
 
+env:
+  GOPRIVATE: github.com/upsun/lib-sun
+
 jobs:
   release-linux-amd64:
     name: release linux/amd64
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
+    - name: Run config private repo
+      env:
+        TOKEN: ${{ secrets.MICK_GITHUB_TOKEN }}
+      run: git config --global url."https://user:${TOKEN}@github.com".insteadOf https://github.com
     - uses: wangyoucao577/go-release-action@v1
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
