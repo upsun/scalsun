@@ -20,3 +20,7 @@ jobs:
         goos: linux
         goarch: amd64
         project_path: "./cmd/"
+        build_flags: -v
+        ldflags:  -X "version.VERSION=${{ GITHUB_REF_NAME }}"
+        # -X "main.buildTime=${{ env.BUILD_TIME }}" -X main.gitCommit=${{ github.sha }} -X main.gitRef=${{ github.ref }}
+        extra_files: LICENSE README.md
