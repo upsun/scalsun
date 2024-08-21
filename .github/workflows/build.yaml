@@ -11,6 +11,9 @@ on:
 permissions:
   contents: read
 
+env:
+  GOPRIVATE: github.com/upsun
+
 jobs:
   lint:
     runs-on: ubuntu-latest
@@ -20,6 +23,8 @@ jobs:
       with:
         go-version: '1.22'
         check-latest: true
+    - name: Run config private repo
+      run: git config --global url.https://${{ secrets.GITHUB_TOKEN }}@github.com/.insteadOf https://github.com/
     - name: Run Go Format
       run: gofmt -s -w . && git diff --exit-code
     - name: Run Go Tidy
@@ -40,6 +45,8 @@ jobs:
     - uses: actions/setup-go@v4
     - name: Run tests
       run: go test -v -count=1 -race -shuffle=on -coverprofile=coverage.txt ./...
+    - name: Run config private repo
+      run: git config --global url.https://${{ secrets.GITHUB_TOKEN }}@github.com/.insteadOf https://github.com/
     - name: Go Benchmark
       run: go test -v -shuffle=on -run=- -bench=. -benchtime=1x ./...
     - name: Install govulncheck
@@ -62,5 +69,7 @@ jobs:
     - uses: actions/setup-go@v4
       with:
         go-version: '1.22'
+    - name: Run config private repo
+      run: git config --global url.https://${{ secrets.GITHUB_TOKEN }}@github.com/.insteadOf https://github.com/
     - name: Build
       run: go build -o /dev/null -v ./...
