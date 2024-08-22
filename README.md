@@ -39,6 +39,7 @@ env:UPSUN_CLI_TOKEN
 
 ```
 Usage of scalsun:
+      --name string                     Apps or Service name
       --min_host_count: int             Minimum host count (default 1)
       --max_host_count int              Maximum host count (default 3)
       --min_cpu_usage_upscale float     Minimum CPU usage in % (for upscale event only) (default 75.0)
@@ -48,3 +49,9 @@ Usage of scalsun:
   -v, --verbose                         Enable verbose mode
   -s, --silent                          Enable silent mode
 ```
+
+#### Samples
+- Auto-scale all app/service
+`scalsun --silent --max_host_count=${H_SCALING_HOST_MAX:-3}`
+- Auto-scale only specific app (if app name is web)
+`scalsun --silent --max_host_count=${H_SCALING_HOST_MAX:-3} --name=web`
