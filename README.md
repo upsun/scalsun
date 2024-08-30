@@ -42,12 +42,13 @@ Usage of scalsun:
       --name string                     Apps or Service name
       --min_host_count: int             Minimum host count (default 1)
       --max_host_count int              Maximum host count (default 3)
-      --min_cpu_usage_upscale float     Minimum CPU usage in % (for upscale event only) (default 75.0)
-      --max_cpu_usage_downscale float   Maximum CPU usage in % (for downscale event only) (default 60.0)
-      --min_mem_usage_upscale float     Minimum memory usage in % (for upscale event only) (default 80.0)
-      --max_mem_usage_downscale float   Maximum memory usage in % (for downscale event only) (default 20.0)
+      --min_cpu_usage_upscale float     Minimum CPU usage in % (for upscale event only) (default 75)
+      --max_cpu_usage_downscale float   Maximum CPU usage in % (for downscale event only) (default 60)
+      --min_mem_usage_upscale float     Minimum memory usage in % (for upscale event only) (default 80)
+      --max_mem_usage_downscale float   Maximum memory usage in % (for downscale event only) (default 20)
   -v, --verbose                         Enable verbose mode
   -s, --silent                          Enable silent mode
+      --pathLog string                  Define Path of Log file (default "./")
 ```
 
 #### Samples

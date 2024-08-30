@@ -31,6 +31,10 @@ func init() {
 
 	flag.CommandLine.SortFlags = false
 	flag.Parse()
+
+	//TODO(Mick) Hack (replace by context object)
+	lib.VERSION = app.VERSION
+	lib.Args = app.Args
 }
 
 func main() {
@@ -44,12 +48,10 @@ func main() {
 	if projectID == "" || branch == "" {
 		log.Fatal("No PLATFORM_PROJECT and PLATFORM_BRANCH environment variable set!")
 	} else {
+		//TODO(Mick) Hack (replace by context object)
 		app.Args.PathLog = "/var/log"
+		lib.Args = app.Args
 	}
-
-	//TODO(Mick) Hack (replace by context object)
-	lib.VERSION = app.VERSION
-	lib.Args = app.Args
 
 	// Init
 	projectContext := entity.MakeProjectContext(
