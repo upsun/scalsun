@@ -14,7 +14,7 @@ Add to build hook :
         build: |
             mkdir bin
             curl -fsSL https://raw.githubusercontent.com/platformsh/cli/main/installer.sh | VENDOR=upsun bash
-            curl -fsSL https://github.com/upsun/scalsun/releases/download/v0.3.0/scalsun-v0.3.0-linux-amd64.tar.gz | tar -xzf - -c bin
+            curl -fsSL https://github.com/upsun/scalsun/releases/download/v0.3.3/scalsun-v0.3.3-linux-amd64.tar.gz | tar -xzf - -c bin
 ```
 
 Add cron task every minute :
