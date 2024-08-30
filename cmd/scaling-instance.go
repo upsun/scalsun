@@ -5,6 +5,7 @@ import (
 	"os"
 
 	flag "github.com/spf13/pflag"
+	lib "github.com/upsun/lib-sun"
 	entity "github.com/upsun/lib-sun/entity"
 	utils "github.com/upsun/lib-sun/utility"
 	app "github.com/upsun/scalsun"
@@ -26,6 +27,7 @@ func init() {
 
 	flag.BoolVarP(&app.Args.Verbose, "verbose", "v", false, "Enable verbose mode")
 	flag.BoolVarP(&app.Args.Silent, "silent", "s", false, "Enable silent mode")
+	flag.StringVarP(&app.Args.PathLog, "pathLog", "s", "./", "Define Path of Log file")
 
 	flag.CommandLine.SortFlags = false
 	flag.Parse()
@@ -41,7 +43,13 @@ func main() {
 
 	if projectID == "" || branch == "" {
 		log.Fatal("No PLATFORM_PROJECT and PLATFORM_BRANCH environment variable set!")
+	} else {
+		app.Args.PathLog = "/var/log"
 	}
+
+	//TODO(Mick) Hack (replace by context object)
+	lib.VERSION = app.VERSION
+	lib.Args = app.Args
 
 	// Init
 	projectContext := entity.MakeProjectContext(

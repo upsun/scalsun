@@ -51,7 +51,7 @@ Usage of scalsun:
 ```
 
 #### Samples
-- Auto-scale all app/service
+- Auto-scale all app/service  
 `scalsun --silent --max_host_count=${H_SCALING_HOST_MAX:-3}`
-- Auto-scale only specific app (if app name is web)
+- Auto-scale only specific app (if app name is web)  
 `scalsun --silent --max_host_count=${H_SCALING_HOST_MAX:-3} --name=web`
