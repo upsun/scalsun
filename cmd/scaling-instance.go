@@ -27,7 +27,7 @@ func init() {
 
 	flag.BoolVarP(&app.Args.Verbose, "verbose", "v", false, "Enable verbose mode")
 	flag.BoolVarP(&app.Args.Silent, "silent", "s", false, "Enable silent mode")
-	flag.StringVarP(&app.Args.PathLog, "pathLog", "", "./", "Define Path of Log file")
+	flag.StringVarP(&app.Args.PathLog, "pathLog", "", "/var/log/", "Define Path of Log file")
 
 	flag.CommandLine.SortFlags = false
 	flag.Parse()
