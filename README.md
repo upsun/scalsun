@@ -15,9 +15,8 @@ Add to build hook :
 ```
     hook:
         build: |
-            mkdir bin
-            curl -fsSL https://raw.githubusercontent.com/platformsh/cli/main/installer.sh | VENDOR=upsun bash
-            curl -fsSL https://github.com/upsun/scalsun/releases/download/v0.3.3/scalsun-v0.3.3-linux-amd64.tar.gz | tar -xzf - -c bin
+            curl -fsS https://raw.githubusercontent.com/upsun/snippets/main/src/install-upsun-tool.sh | bash /dev/stdin "scalsun"
+
 ```
 
 Add cron task every minute :
@@ -51,7 +50,7 @@ Usage of scalsun:
       --max_mem_usage_downscale float   Maximum memory usage in % (for downscale event only) (default 20)
   -v, --verbose                         Enable verbose mode
   -s, --silent                          Enable silent mode
-      --pathLog string                  Define Path of Log file (default "./")
+      --pathLog string                  Define Path of Log file (default "/var/log/")
 ```
 
 #### Samples
