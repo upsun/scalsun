@@ -104,6 +104,29 @@ func ScalingInstance(projectContext entity.ProjectGlobal) {
 		usages[name] = usage
 	}
 
+	if !app.ArgsS.IncludeServices {
+		// Get Services
+		log.Println("Dectect available services of project... (to exclude)")
+		payload = []string{
+			"--environment=" + projectContext.DefaultEnv,
+			"--format=csv",
+			"--columns=name",
+			"--no-header",
+			"--no-interaction",
+			"--yes",
+		}
+		output, err = utils.CallCLIString(projectContext, "service:list", payload...)
+		if err != nil {
+			log.Fatalf("command execution failed: %s", err)
+		}
+
+		// Parse output
+		srvs := strings.Split(output, "\n")
+		for _, srv := range srvs[:len(srvs)-1] {
+			delete(usages, srv)
+		}
+	}
+
 	// Compute
 	log.Println("Compute trend...")
 

@@ -18,6 +18,7 @@ const (
 
 func init() {
 	flag.StringVarP(&app.ArgsS.Name, "name", "", "", "Apps or Service name")
+	flag.BoolVarP(&app.ArgsS.IncludeServices, "include_service", "", false, "Autoscale the services")
 	flag.IntVarP(&app.ArgsS.HostCountMin, "min_host_count:", "", 1, "Minimum host count")
 	flag.IntVarP(&app.ArgsS.HostCountMax, "max_host_count", "", 3, "Maximum host count")
 	flag.Float64VarP(&app.ArgsS.CpuUsageMin, "min_cpu_usage_upscale", "", 75.0, "Minimum CPU usage in % (for upscale event only)")
