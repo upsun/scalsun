@@ -1,11 +1,12 @@
-> [!CAUTION]
-> ## This project is owned by the Upsun Advocacy team. It is in early stage of development [experimental] and only intended to be used with caution by Upsun customers/community.   <br /><br />This project is not supported by Upsun and does not qualify for Support plans. Use this repository at your own risks, it is provided without guarantee or warranty!  
-> **PS: if you have downloaded that binary and appreciated it, I kindly ask you to let us know on [Discord](https://discord.com/invite/platformsh)  (you can then later discuss with one of our Product manager to share your feedback on it).**
-
 ScalSun
 =========
 
 This tool provide simple auto horizontal scaling on upsun project for your application containers.
+
+> [!CAUTION]
+> **This project is owned by the Upsun Advocacy team. It is in early stage of development [experimental] and only intended to be used with caution by Upsun customers/community.   <br /><br />This project is not supported by Upsun and does not qualify for Support plans. Use this repository at your own risks, it is provided without guarantee or warranty!**  
+>   
+> PS: if you have downloaded that binary and appreciated it, I kindly ask you to let us know on [Discord](https://discord.com/invite/platformsh)  (you can then later discuss with one of our Product manager to share your feedback on it).
 
 ## Usage/install
 
