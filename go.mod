@@ -1,10 +1,10 @@
 module github.com/upsun/scalsun
 
-go 1.22.6
+go 1.23.5
 
 require (
 	github.com/spf13/pflag v1.0.5
-	github.com/upsun/lib-sun v0.3.12
+	github.com/upsun/lib-sun v0.3.14
 )
 
 require (
