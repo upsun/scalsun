@@ -84,24 +84,26 @@ func ScalingInstance(projectContext entity.ProjectGlobal) {
 	// Parse output
 	apps = strings.Split(output, "\n")
 	for _, app_str := range apps[:len(apps)-1] {
-		app := strings.Split(app_str, ",")
+		app_raw := strings.Split(app_str, ",")
 
 		// Normalize
-		name := app[0]
-		instance, err := strconv.Atoi(app[1])
+		name := app_raw[0]
+		instance, err := strconv.Atoi(app_raw[1])
 		if err != nil {
 			break
 		}
 
 		// Get or create app/service usage
-		usage, found := usages[name]
-		if !found {
-			usage = UsageApp{Name: name}
-		}
+		if app.ArgsS.Name == "" || app.ArgsS.Name == name {
+			usage, found := usages[name]
+			if !found {
+				usage = UsageApp{Name: name}
+			}
 
-		// Assign
-		usage.InstanceOld = instance
-		usages[name] = usage
+			// Assign
+			usage.InstanceOld = instance
+			usages[name] = usage
+		}
 	}
 
 	if !app.ArgsS.IncludeServices {
