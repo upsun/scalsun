@@ -44,6 +44,10 @@ env:UPSUN_CLI_TOKEN
 ```
 Usage of scalsun:
       --name string                     Apps or Service name
+      --include_service                 Autoscale the services
+      --type string                     Type of scaling (horizontal or vertical or timming) (default "horizontal")
+      --min_size_count: float           Minimum host size (default 0.1)
+      --max_size_count float            Maximum host size (default 8)
       --min_host_count: int             Minimum host count (default 1)
       --max_host_count int              Maximum host count (default 3)
       --min_cpu_usage_upscale float     Minimum CPU usage in % (for upscale event only) (default 75)
@@ -56,7 +60,14 @@ Usage of scalsun:
 ```
 
 #### Samples
-- Auto-scale all app/service  
+- Auto-scale (Horizontal) all app/service  
 `scalsun --silent --max_host_count=${H_SCALING_HOST_MAX:-3}`
-- Auto-scale only specific app (if app name is web)  
-`scalsun --silent --max_host_count=${H_SCALING_HOST_MAX:-3} --name=web`
+
+- Auto-scale (Horizontal) only specific app (if app name is web)  
+`scalsun --silent --type=horizontal --max_host_count=${H_SCALING_HOST_MAX:-3} --name=web`
+
+- Auto-scale (Vertical) only specific app (if app name is web)  
+`scalsun --silent --type=vertical --max_cpu_usage_downscale=20 --max_host_size=1 --min_host_size=0.1 --name=web`
+
+- Auto-scale (Custom) only specific app (if app name is web)  
+`scalsun --silent --type=custom --max_host_size=1 --max_host_count=0.1 --name=web`
