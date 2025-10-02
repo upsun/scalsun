@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log"
 	"math"
-	"slices"
 	"strconv"
 	"strings"
 
@@ -30,7 +29,7 @@ type UsageApp struct {
 	// Vertical scaling
 	IdProfileUpdate bool
 	IdProfileOld    float64
-	IdProfileNew    float64
+	IdProfileNew    SizeProfile
 }
 
 type SizeProfile struct {
@@ -44,21 +43,22 @@ func ForceContainerInstance(projectContext entity.ProjectGlobal) {
 
 	log.Println("Process Force Scaling... (only use max_host_count & max_size_count argument)")
 
-	sizesAvailable := ListContainerSize(projectContext)
-	if slices.Contains(sizesAvailable, app.ArgsS.HostSizeMax) {
-
-	}
-
 	GetContainersUsage(projectContext, usages)
+	RemoveUnscaleContainers(projectContext, usages)
+	hostSizeMax := app.ArgsS.HostSizeMax
+	hostCountMax := app.ArgsS.HostCountMax
 
 	for _, usage := range usages {
-		if usage.IdProfileOld < app.ArgsS.HostSizeMax {
-			usage.IdProfileNew = app.ArgsS.HostSizeMax
+		profils := ListContainerSize(projectContext, usage.Name)
+		idProfilProposal := findBestUpProfile(profils, hostSizeMax, hostSizeMax)
+
+		if usage.IdProfileOld != hostSizeMax {
+			usage.IdProfileNew = idProfilProposal
 			usage.IdProfileUpdate = true
 		}
 
-		if usage.InstanceOld < app.ArgsS.HostCountMax {
-			usage.InstanceNew = app.ArgsS.HostCountMax
+		if usage.InstanceOld != hostCountMax {
+			usage.InstanceNew = hostCountMax
 			usage.InstanceUpdate = true
 		}
 
@@ -71,7 +71,7 @@ func ForceContainerInstance(projectContext entity.ProjectGlobal) {
 func ScalingContainer(projectContext entity.ProjectGlobal) {
 	usages := map[string]UsageApp{}
 
-	log.Println("Process Vertical Auto-Scaling...")
+	log.Println("Process Vertical Auto-Scaling... (with down-time)")
 
 	GetProjectMetrics(projectContext, usages)
 	GetContainersUsage(projectContext, usages)
@@ -83,24 +83,34 @@ func ScalingContainer(projectContext entity.ProjectGlobal) {
 
 		//// Algo Threshold-limit
 		lastMetric := usage.Values[len(usage.Values)-1]
+		cpuUsageMin := app.ArgsS.CpuUsageMin
+		cpuUsageMax := app.ArgsS.CpuUsageMax
+		memUsageMin := app.ArgsS.MemUsageMin
+		memUsageMax := app.ArgsS.MemUsageMax
+		hostSizeMax := app.ArgsS.HostSizeMax
+		hostSizeMin := app.ArgsS.HostSizeMin
+
+		profils := ListContainerSize(projectContext, usage.Name)
 
 		// CPU case
-		if lastMetric.Cpu > app.ArgsS.CpuUsageMin && usage.IdProfileOld < app.ArgsS.HostSizeMax {
-			idProfilProposal := float64(math.Ceil(float64(usage.IdProfileOld) * (lastMetric.Cpu / app.ArgsS.CpuUsageMin)))
-			if usage.IdProfileNew < idProfilProposal {
+		if lastMetric.Cpu > cpuUsageMin && usage.IdProfileOld <= hostSizeMax {
+			idProfilCpuTheorical := usage.IdProfileOld * (lastMetric.Cpu / cpuUsageMin)
+			idProfilProposal := findBestUpProfile(profils, idProfilCpuTheorical, hostSizeMax)
+			if usage.IdProfileNew.Cpu < idProfilProposal.Cpu {
 				usage.IdProfileNew = idProfilProposal
-				if int(usage.IdProfileNew) != int(usage.IdProfileOld) {
-					log.Printf("Upscale instance %v from %v to %v ! (Cpu: %v > %v)", usage.Name, usage.IdProfileOld, usage.IdProfileNew, lastMetric.Cpu, app.ArgsS.CpuUsageMin)
+				if usage.IdProfileNew.Cpu != usage.IdProfileOld {
+					log.Printf("Upscale profile %v from %v to %v ! (Cpu: %v > %v)", usage.Name, usage.IdProfileOld, usage.IdProfileNew.Id, lastMetric.Cpu, cpuUsageMin)
 					usage.IdProfileUpdate = true
 				}
 			}
 			usages[usage.Name] = usage
-		} else if lastMetric.Cpu < app.ArgsS.CpuUsageMax && usage.IdProfileOld > app.ArgsS.HostSizeMin {
-			idProfilProposal := float64(math.Ceil(float64(usage.IdProfileOld) * (lastMetric.Cpu / app.ArgsS.CpuUsageMax)))
-			if usage.IdProfileNew < idProfilProposal {
+		} else if lastMetric.Cpu < cpuUsageMax && usage.IdProfileOld >= hostSizeMin {
+			idProfilCpuTheorical := usage.IdProfileOld * (lastMetric.Cpu / cpuUsageMax)
+			idProfilProposal := findBestDownProfile(profils, idProfilCpuTheorical, hostSizeMin)
+			if usage.IdProfileNew.Cpu < idProfilProposal.Cpu {
 				usage.IdProfileNew = idProfilProposal
-				if usage.IdProfileNew != usage.IdProfileOld {
-					log.Printf("Downscale instance %v from %v to %v ! (Cpu: %v < %v)", usage.Name, usage.IdProfileOld, usage.IdProfileNew, lastMetric.Cpu, app.ArgsS.CpuUsageMax)
+				if usage.IdProfileNew.Cpu != usage.IdProfileOld {
+					log.Printf("Downscale profile %v from %v to %v ! (Cpu: %v < %v)", usage.Name, usage.IdProfileOld, usage.IdProfileNew.Id, lastMetric.Cpu, cpuUsageMax)
 					usage.IdProfileUpdate = true
 				}
 			}
@@ -108,23 +118,25 @@ func ScalingContainer(projectContext entity.ProjectGlobal) {
 		}
 
 		// Mem case
-		if lastMetric.Mem > app.ArgsS.MemUsageMin && usage.IdProfileOld < app.ArgsS.HostSizeMax {
-			idProfilProposal := float64(math.Ceil(float64(usage.IdProfileOld) * (lastMetric.Mem / app.ArgsS.MemUsageMin)))
-			if usage.IdProfileNew < idProfilProposal {
+		if lastMetric.Mem > memUsageMin && usage.IdProfileOld <= hostSizeMax {
+			idProfilCpuTheorical := usage.IdProfileOld * (lastMetric.Mem / memUsageMin)
+			idProfilProposal := findBestUpProfile(profils, idProfilCpuTheorical, hostSizeMax)
+			if usage.IdProfileNew.Cpu < idProfilProposal.Cpu {
 				usage.IdProfileNew = idProfilProposal
-				if usage.IdProfileNew != usage.IdProfileOld {
-					log.Printf("Upscale instance %v from %v to %v ! (Mem: %v > %v)", usage.Name, usage.IdProfileOld, usage.IdProfileNew, lastMetric.Mem, app.ArgsS.MemUsageMin)
-					usage.InstanceUpdate = true
+				if usage.IdProfileNew.Cpu != usage.IdProfileOld {
+					log.Printf("Upscale profile %v from %v to %v ! (Mem: %v > %v)", usage.Name, usage.IdProfileOld, usage.IdProfileNew.Id, lastMetric.Mem, memUsageMin)
+					usage.IdProfileUpdate = true
 				}
 			}
 			usages[usage.Name] = usage
-		} else if lastMetric.Mem < app.ArgsS.MemUsageMax && usage.IdProfileOld > app.ArgsS.HostSizeMin {
-			idProfilProposal := float64(math.Ceil(float64(usage.IdProfileOld) * (lastMetric.Mem / app.ArgsS.MemUsageMax)))
-			if usage.IdProfileNew < idProfilProposal {
+		} else if lastMetric.Mem < memUsageMax && usage.IdProfileOld >= hostSizeMin {
+			idProfilCpuTheorical := usage.IdProfileOld * (lastMetric.Mem / memUsageMax)
+			idProfilProposal := findBestDownProfile(profils, idProfilCpuTheorical, hostSizeMin)
+			if usage.IdProfileNew.Cpu < idProfilProposal.Cpu {
 				usage.IdProfileNew = idProfilProposal
-				if usage.IdProfileNew != usage.IdProfileOld {
-					log.Printf("Downscale instance %v from %v to %v ! (Mem: %v > %v)", usage.Name, usage.IdProfileOld, usage.IdProfileNew, lastMetric.Mem, app.ArgsS.MemUsageMax)
-					usage.InstanceUpdate = true
+				if usage.IdProfileNew.Cpu != usage.IdProfileOld {
+					log.Printf("Downscale profile %v from %v to %v ! (Mem: %v < %v)", usage.Name, usage.IdProfileOld, usage.IdProfileNew.Id, lastMetric.Mem, memUsageMax)
+					usage.IdProfileUpdate = true
 				}
 			}
 			usages[usage.Name] = usage
@@ -134,10 +146,48 @@ func ScalingContainer(projectContext entity.ProjectGlobal) {
 	SetResources(projectContext, usages)
 }
 
+func findBestUpProfile(profils []SizeProfile, idProfilTheorical float64, hostSizeMax float64) SizeProfile {
+	profilProposal := profils[0]
+
+	for idx, profile := range profils {
+
+		if profile.Cpu > hostSizeMax {
+			profilProposal = profils[idx-1]
+			break
+		}
+
+		if profile.Cpu >= idProfilTheorical {
+			profilProposal = profile
+			break
+		}
+	}
+	return profilProposal
+}
+
+func findBestDownProfile(profils []SizeProfile, idProfilTheorical float64, hostSizeMin float64) SizeProfile {
+	profilProposal := profils[0]
+
+	// Iterate in reverse order to find the first profile below the theoretical value
+	for idx := len(profils) - 1; idx >= 0; idx-- {
+		profile := profils[idx]
+
+		if profile.Cpu < hostSizeMin {
+			profilProposal = profils[idx+1]
+			break
+		}
+
+		if profile.Cpu <= idProfilTheorical {
+			profilProposal = profile
+			break
+		}
+	}
+	return profilProposal
+}
+
 func ScalingInstance(projectContext entity.ProjectGlobal) {
 	usages := map[string]UsageApp{}
 
-	log.Println("Process Horizontal Auto-Scaling...")
+	log.Println("Process Horizontal Auto-Scaling... (without down-time)")
 
 	GetProjectMetrics(projectContext, usages)
 	GetContainersUsage(projectContext, usages)
@@ -201,11 +251,11 @@ func ScalingInstance(projectContext entity.ProjectGlobal) {
 }
 
 // ListContainerSize retrieves the size profiles of containers in the project.
-func ListContainerSize(projectContext entity.ProjectGlobal) []float64 { // SizeProfile {
+func ListContainerSize(projectContext entity.ProjectGlobal, name string) []SizeProfile {
 	log.Println("Get Size of Profile available...")
 	payload := []string{
 		"--environment=" + projectContext.DefaultEnv,
-		"--service=" + app.ArgsS.Name,
+		"--service=" + name,
 		"--no-header",
 		"--format=csv",
 		"--no-interaction",
@@ -213,25 +263,24 @@ func ListContainerSize(projectContext entity.ProjectGlobal) []float64 { // SizeP
 	}
 	output, err := utils.CallCLIString(projectContext, "resources:size:list", payload...)
 	if err != nil {
-		log.Fatalf("command execution failed: %s", err)
+		log.Printf("No profile for this container")
 	}
 
 	// Parse output
 	size_tpl := strings.Split(output, "\n")
-	var sizeProfiles []float64 // SizeProfile
+	var sizeProfiles []SizeProfile
 	for _, size_str := range size_tpl[:len(size_tpl)-1] {
 		size := strings.Split(size_str, ",")
 
 		// Normalize
-		// cpu, _ := strconv.ParseFloat(size[1], 64)
-		// mem, _ := strconv.ParseInt(size[2], 10, 32)
-		// profile := SizeProfile{
-		// 	Id:  size[0],
-		// 	Cpu: cpu,
-		// 	Mem: int32(mem),
-		// }
-		sizeId, _ := strconv.ParseFloat(size[0], 64)
-		sizeProfiles = append(sizeProfiles, sizeId) // profile)
+		cpu, _ := strconv.ParseFloat(size[1], 64)
+		mem, _ := strconv.ParseInt(size[2], 10, 32)
+		profile := SizeProfile{
+			Id:  size[0],
+			Cpu: cpu,
+			Mem: int32(mem),
+		}
+		sizeProfiles = append(sizeProfiles, profile)
 	}
 
 	return sizeProfiles
@@ -345,6 +394,14 @@ func RemoveUnscaleContainers(projectContext entity.ProjectGlobal, usages map[str
 			delete(usages, srv)
 		}
 	}
+
+	for _, usage := range usages {
+		if strings.Contains(usage.Name, "---internal---storage") {
+			delete(usages, usage.Name)
+		}
+
+		//if (usage.Name)
+	}
 }
 
 func SetResources(projectContext entity.ProjectGlobal, usages map[string]UsageApp) {
@@ -371,7 +428,7 @@ func SetResources(projectContext entity.ProjectGlobal, usages map[string]UsageAp
 			}
 			updateContainer += usage.Name
 			updateContainer += ":"
-			updateContainer += fmt.Sprintf("%.1f", usage.IdProfileNew)
+			updateContainer += usage.IdProfileNew.Id
 		}
 	}
 

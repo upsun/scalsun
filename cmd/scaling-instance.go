@@ -24,16 +24,16 @@ const (
 func init() {
 	// Common arguments
 	flag.StringVarP(&app.ArgsS.Name, "name", "", "", "Apps or Service name")
-	flag.BoolVarP(&app.ArgsS.IncludeServices, "include_service", "", false, "Autoscale the services")
+	flag.BoolVarP(&app.ArgsS.IncludeServices, "include_service", "", false, "Autoscale the services (not applicable)")
 
 	flag.StringVarP(&app.ArgsS.Type, "type", "", TYPE_HORIZONTAL, fmt.Sprintf("Type of scaling (%s or %s or %s)", TYPE_HORIZONTAL, TYPE_VERTICAL, TYPE_CUSTOM))
 
 	// Vertical scaling arguments
-	flag.Float64VarP(&app.ArgsS.HostSizeMin, "min_size_count:", "", 0.1, "Minimum host size")
+	flag.Float64VarP(&app.ArgsS.HostSizeMin, "min_size_count", "", 0.1, "Minimum host size")
 	flag.Float64VarP(&app.ArgsS.HostSizeMax, "max_size_count", "", 8, "Maximum host size")
 
 	// Horizontal scaling arguments
-	flag.IntVarP(&app.ArgsS.HostCountMin, "min_host_count:", "", 1, "Minimum host count")
+	flag.IntVarP(&app.ArgsS.HostCountMin, "min_host_count", "", 1, "Minimum host count")
 	flag.IntVarP(&app.ArgsS.HostCountMax, "max_host_count", "", 3, "Maximum host count")
 
 	// Trigger
